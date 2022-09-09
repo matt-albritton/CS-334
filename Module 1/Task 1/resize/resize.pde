@@ -2,6 +2,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsDevice;
 
 void positionDisplay() {
+  surface.setResizable(true);
+  
   GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
   GraphicsDevice[] devices = g.getScreenDevices();
   
@@ -18,7 +20,6 @@ void positionDisplay() {
     if(ratio > 2.0) {
       bigWidth = Math.round(currWidth);
       bigHeight = Math.round(currHeight);
-      break;
     } else {
       smallWidth = Math.round(currWidth);
       smallHeight = Math.round(currHeight);
@@ -26,10 +27,9 @@ void positionDisplay() {
   }
   
   surface.setSize(bigWidth * 2, bigHeight);
-  surface.setLocation(100, 100);
+  surface.setLocation(smallWidth, smallHeight);
 }
 
 void setup() {
-  surface.setResizable(true);
   positionDisplay();
 }
