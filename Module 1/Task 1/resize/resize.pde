@@ -27,7 +27,7 @@ void positionDisplay() {
   }
   
   surface.setSize(bigWidth * 2, bigHeight);
-  surface.setLocation(smallWidth, smallHeight);
+  surface.setLocation(smallWidth, 0);
 }
 
 void setup() {
