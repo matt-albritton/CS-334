@@ -1,3 +1,9 @@
-The method in which we mapped the projectors centered around pixel addresses. Our two photos - computer_layout and display_layout show the 6 screens as mapped to the projectors and to the computer. In order to achive projector displays with arrow orientation and screen number as described in display_layout, you can create the display as shown in computer_layout. We kept the (x,y) coordinate system of the computer window required, and you can see the pixel coordinates of the corners that match up on both images. Lastly, we added simple markings on the edges of the displays that show which display connects to which- these correlate between the two images.
+The method in which we mapped the projectors centered around pixel addresses. Our two photos - computer_layout and 
+display_layout show the 6 screens as mapped to the projectors and to the computer. In order to achive projector displays with
+arrow orientation and screen number as described in display_layout, you can create the display as shown in computer_layout. 
+We kept the (x,y) coordinate system of the computer window required, and you can see the pixel coordinates of the corners 
+that match up on both images. Lastly, we added simple markings on the edges of the displays that show which display connects 
+to which- these correlate between the two images.
 
-This system works by showing the desired orientation and display of the projectors in display_layout, and then showing what mapping, orientation, and ordering is needed to achive this in computer_layout.
+This system works by showing the desired orientation and display of the projectors in display_layout, and then showing what 
+mapping, orientation, and ordering is needed to achive this in computer_layout.
