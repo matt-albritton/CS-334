@@ -20,17 +20,20 @@ float probabilityOfAliveAtStart = 30;
 float probabilityOfAliveDuring = 30;
 
 // Variables for timer
-int interval = 50;
+int interval = 3000;
 int lastRecordedTime = 0;
 
 //variables for new cells
-int newInterval = 500;
+int newInterval = 5000;
 int newLastRecordedTime = 0;
 
 // Colors for active/inactive cells
 color alive = color(0, 200, 0);
 color dead = color(0);
-int opacity = 30;
+int opacity = 10;
+int oOffset = 0;
+int oInterval = interval / opacity;
+int oLastTime = 0;
 
 //edges set up:
 int vertExtra = 40;
@@ -87,22 +90,43 @@ void setup() {
 void draw() {
   clear();
 
+  if (millis()-oLastTime>oInterval) {
+    oOffset = oOffset + 1;
+    oLastTime = millis();
+    if (oOffset > opacity){
+      oOffset = 0;
+    }
+  }
+
   //Draw grid
   for (int x=0; x<width/cellSize; x++) {
     for (int y=0; y<height/cellSize; y++) {
-      if (cells[x+horzExtra][y+vertExtra]!=#000000) {
-        noStroke();
-        fill(cells[x+horzExtra][y+vertExtra], opacity); // If alive
-        circle(x*cellSize,y*cellSize,circleSize);
+      noStroke();
+      if (cells[x+horzExtra][y+vertExtra]!=#000000 || cellsBuffer[x+horzExtra][y+vertExtra]!=#000000) {
+        if (cells[x+horzExtra][y+vertExtra]!=#000000 && cellsBuffer[x+horzExtra][y+vertExtra]!=#000000) {
+          fill(cells[x+horzExtra][y+vertExtra], opacity); // If alive
+          circle(x*cellSize,y*cellSize,circleSize);
+        }
+        else if (cells[x+horzExtra][y+vertExtra]!=#000000){
+          fill(cells[x+horzExtra][y+vertExtra], oOffset); // If alive
+          circle(x*cellSize,y*cellSize,circleSize);
+        }
+        else{
+          fill(cells[x+horzExtra][y+vertExtra], opacity-oOffset); // If alive
+          circle(x*cellSize,y*cellSize,circleSize);
+        }
       }
     }
   }
+  
+  
   // Iterate if timer ticks
   if (millis()-lastRecordedTime>interval) {
-    if (!pause) {
-      iteration();
-      lastRecordedTime = millis();
-    }
+    iteration();
+    lastRecordedTime = millis();
+    oOffset = 0;
+    oLastTime = millis();
+
   }
   // Iterate if longer random timer ticks
   if (millis()-newLastRecordedTime>newInterval) {
