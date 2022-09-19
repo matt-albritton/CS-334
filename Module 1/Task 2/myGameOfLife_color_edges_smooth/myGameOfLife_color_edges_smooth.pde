@@ -13,14 +13,14 @@
 
 // Size of cells
 int cellSize = 2;
-int circleSize = 8;
+int circleSize = 6;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 10;
 float probabilityOfAliveDuring = 30;
 
 // Variables for timer
-float interval = 50;
+float interval = 800;
 float lastRecordedTime = 0;
 
 //variables for new cells
@@ -51,7 +51,9 @@ color[][] cellsBuffer;
 boolean pause = false;
 
 void setup() {
-  size (570, 170);
+  //size (576, 170); // 1/8
+  size (1152, 340); //1/4
+  //size (2304, 680); // 1/2
   fullWidth = width/cellSize + (2*horzExtra);
   fullHeight = height/cellSize + (2*vertExtra);
   
@@ -74,11 +76,11 @@ void setup() {
       }
       else {
         state = 1;
-        //float r = random(256);
-        //float g = random(256);
-        //float b = random(256);
-        //cells[x][y] = color(r,g,b);
-        cells[x][y] = getColor(x,y);
+        float r = random(256);
+        float g = random(256);
+        float b = random(256);
+        cells[x][y] = color(r,g,b);
+        //cells[x][y] = getColor(x,y);
       }
       cellsBuffer[x][y] = #000000; // Save state of each cell
     }
@@ -178,8 +180,8 @@ void iteration() { // When the clock ticks
       } 
       else { // The cell is dead: make it live if necessary      
 //*******   MAKING ALIVE CELLS *******************************************************
-        if (neighbours == 3 ) {
-          cells[x][y] = color((rTotal/3), (gTotal/3), (bTotal/3)); // Only if it has 3 neighbours
+        if (neighbours == 3) {
+          cells[x][y] = color((rTotal/neighbours), (gTotal/neighbours), (bTotal/neighbours)); // Only if it has 3 neighbours
         }
       } // End of if
     } // End of y loop
