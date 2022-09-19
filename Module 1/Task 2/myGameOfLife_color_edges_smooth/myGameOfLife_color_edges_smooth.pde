@@ -12,27 +12,27 @@
 
 
 // Size of cells
-int cellSize = 5;
-int circleSize = 25;
+int cellSize = 2;
+int circleSize = 8;
 
 // How likely for a cell to be alive at start (in percentage)
-float probabilityOfAliveAtStart = 30;
+float probabilityOfAliveAtStart = 10;
 float probabilityOfAliveDuring = 30;
 
 // Variables for timer
-int interval = 3000;
-int lastRecordedTime = 0;
+float interval = 50;
+float lastRecordedTime = 0;
 
 //variables for new cells
-int newInterval = 5000;
+int newInterval = 500;
 int newLastRecordedTime = 0;
 
 // Colors for active/inactive cells
 color alive = color(0, 200, 0);
 color dead = color(0);
-int opacity = 10;
-int oOffset = 0;
-int oInterval = interval / opacity;
+float opacity = 75;
+float oOffset = 0;
+//int oInterval = interval / opacity;
 int oLastTime = 0;
 
 //edges set up:
@@ -74,12 +74,13 @@ void setup() {
       }
       else {
         state = 1;
-        float r = random(256);
-        float g = random(256);
-        float b = random(256);
-        cells[x][y] = color(r,g,b);
+        //float r = random(256);
+        //float g = random(256);
+        //float b = random(256);
+        //cells[x][y] = color(r,g,b);
+        cells[x][y] = getColor(x,y);
       }
-      //cells[x][y] = int(state); // Save state of each cell
+      cellsBuffer[x][y] = #000000; // Save state of each cell
     }
   }
   // Fill in black in case cells don't cover all the windows
@@ -90,13 +91,15 @@ void setup() {
 void draw() {
   clear();
 
-  if (millis()-oLastTime>oInterval) {
-    oOffset = oOffset + 1;
-    oLastTime = millis();
-    if (oOffset > opacity){
-      oOffset = 0;
-    }
-  }
+  oOffset = ((millis()-lastRecordedTime)/interval) * opacity;
+
+  //if (millis()-oLastTime>oInterval) {
+  //  oOffset = oOffset + 1;
+  //  oLastTime = millis();
+  //  if (oOffset > opacity){
+  //    oOffset = 0;
+  //  }
+  //}
 
   //Draw grid
   for (int x=0; x<width/cellSize; x++) {
@@ -112,7 +115,7 @@ void draw() {
           circle(x*cellSize,y*cellSize,circleSize);
         }
         else{
-          fill(cells[x+horzExtra][y+vertExtra], opacity-oOffset); // If alive
+          fill(cellsBuffer[x+horzExtra][y+vertExtra], opacity-oOffset); // If alive
           circle(x*cellSize,y*cellSize,circleSize);
         }
       }
@@ -212,14 +215,14 @@ color getColor(int x, int y){
   if (x < horzExtra + sixth){
       return #db2e2e;}
   else if (x < horzExtra + sixth*2){
-      return #dbb82e;}
-  else if (x < horzExtra + sixth*3){
-      return #2edb34;}
-  else if (x < horzExtra + sixth*4){
       return #2edbd8;}
+  else if (x < horzExtra + sixth*3){
+      return #cd2edb;}
+  else if (x < horzExtra + sixth*4){
+      return #2edb34;}
   else if (x < horzExtra + sixth*5){
-      return #312edb;}
-  return #cd2edb;
+      return #dbb82e;}
+  return #312edb;
 }
      
     
