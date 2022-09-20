@@ -14,13 +14,13 @@ import java.awt.GraphicsDevice;
 
 
 // Size of cells
-int cellSize = 2;
-int circleSize = 6;
+int cellSize = 24;
+int circleSize = 40;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 10;
-float probabilityOfAliveDuring = 30;
-float probAliveMid = 80;
+float probabilityOfAliveDuring = 50;
+float probAliveMid = 0;
 
 
 // Variables for timer
@@ -28,7 +28,7 @@ float interval = 800;
 float lastRecordedTime = 0;
 
 //variables for new cells
-int newInterval = 800;
+float newInterval = interval*4;
 int newLastRecordedTime = 0;
 
 // Colors for active/inactive cells
@@ -58,8 +58,8 @@ boolean pause = false;
 
 void setup() {
   //for automatic display position and size
-  //positionDisplay();
-  size (2040, 192); //1/4 of ccam display
+  positionDisplay();
+  //size (2040, 192); //1/4 of ccam display
 
   //size (576, 170); // 1/8
   //size (1152, 340); //1/4
@@ -127,9 +127,9 @@ void draw() {
         int newY = projW - (x%projW);
         int newX;
         if (x < ((simWidth/cellSize) / 2)){
-          newX = y + ((simHeight/2) * (2-(x/projW)));}
+          newX = y + ((simHeight/cellSize) * (2-(x/projW)));}
         else{
-          newX = y + ((simHeight/2) * (3+(5-(x/projW))));}
+          newX = y + ((simHeight/cellSize) * (3+(5-(x/projW))));}
 //*********************************************************
         if (cells[x+horzExtra][y+vertExtra]!=#000000 && cellsBuffer[x+horzExtra][y+vertExtra]!=#000000) {
           fill(cells[x+horzExtra][y+vertExtra], opacity); // If stayed alive
@@ -153,6 +153,7 @@ void draw() {
   if (millis()-lastRecordedTime>interval) {
     //addRandom();
     iteration();
+    //addRandom();
     lastRecordedTime = millis();
     oOffset = 0;
     oLastTime = millis();
@@ -211,11 +212,13 @@ void iteration() { // When the clock ticks
       } // End of if
     } // End of y loop
   } // End of x loop
+  
+  
 } // End of function
 
 
 void addRandom(){
-  print("random");
+  //print("random");
 // Restart: reinitialization of cells
   for (int x=0; x<fullWidth; x++) {
     for (int y=0; y<fullHeight; y++) {
@@ -223,9 +226,8 @@ void addRandom(){
          if (random(100) < probAliveMid) {
             cells[x][y] = getColor(x,y);
           }
-          break;
       }
-      if (random(100) < probabilityOfAliveDuring) {
+      else if (random(100) < probabilityOfAliveDuring) {
         cells[x][y] = getColor(x,y);
       }
     }
@@ -277,5 +279,5 @@ void positionDisplay() {
   }
   
   surface.setSize(bigWidth * 2, bigHeight);
-  surface.setLocation(smallWidth, 0);
+  surface.setLocation(smallWidth, -30);
 }
