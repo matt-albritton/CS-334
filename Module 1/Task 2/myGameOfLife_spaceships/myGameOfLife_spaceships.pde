@@ -14,8 +14,8 @@ import java.awt.GraphicsDevice;
 
 
 // Size of cells
-int cellSize = 2;
-int circleSize = 8;
+int cellSize = 10;
+int circleSize = 25;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 10;
@@ -24,7 +24,7 @@ float probAliveMid = 0;
 
 
 // Variables for timer
-float interval = 200;
+float interval = 500;
 float lastRecordedTime = 0;
 
 //variables for new cells
@@ -35,7 +35,7 @@ int newShips = 1;
 // Colors for active/inactive cells
 color alive = color(0, 200, 0);
 color dead = color(0);
-float opacity = 75;
+float opacity = 100;
 float oOffset = 0;
 //int oInterval = interval / opacity;
 int oLastTime = 0;
@@ -59,8 +59,8 @@ boolean pause = false;
 
 void setup() {
   //for automatic display position and size
-  //positionDisplay();
-  size (2040, 192); //1/4 of ccam display
+  positionDisplay();
+  //size (2040, 192); //1/4 of ccam display
 
   //size (576, 170); // 1/8
   //size (1152, 340); //1/4
@@ -190,9 +190,9 @@ void iteration() { // When the clock ticks
             if (!((xx==x)&&(yy==y))) { // Make sure to to check against self
               if (cellsBuffer[xx][yy]!=#000000){
                 neighbours ++; // Check alive neighbours and count them
-                rTotal = rTotal + red(cellsBuffer[xx][yy]);
-                gTotal = gTotal + green(cellsBuffer[xx][yy]);
-                bTotal = bTotal + blue(cellsBuffer[xx][yy]);
+                rTotal = rTotal + red(cellsBuffer[xx][yy])*red(cellsBuffer[xx][yy]);
+                gTotal = gTotal + green(cellsBuffer[xx][yy])*green(cellsBuffer[xx][yy]);
+                bTotal = bTotal + blue(cellsBuffer[xx][yy])*blue(cellsBuffer[xx][yy]);
                 
               }
             } // End of if
@@ -208,7 +208,7 @@ void iteration() { // When the clock ticks
       else { // The cell is dead: make it live if necessary      
 //*******   MAKING ALIVE CELLS *******************************************************
         if (neighbours == 3) {
-          cells[x][y] = color((rTotal/neighbours), (gTotal/neighbours), (bTotal/neighbours)); // Only if it has 3 neighbours
+          cells[x][y] = color(sqrt(rTotal/neighbours), sqrt(gTotal/neighbours), sqrt(bTotal/neighbours)); // Only if it has 3 neighbours
         }
       } // End of if
     } // End of y loop
@@ -292,5 +292,5 @@ void positionDisplay() {
   }
   
   surface.setSize(bigWidth * 2, bigHeight);
-  surface.setLocation(smallWidth - 100, -30);
+  surface.setLocation(smallWidth, -30);
 }
