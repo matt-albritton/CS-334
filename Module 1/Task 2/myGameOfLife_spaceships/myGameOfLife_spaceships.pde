@@ -14,8 +14,8 @@ import java.awt.GraphicsDevice;
 
 
 // Size of cells
-int cellSize = 10;
-int circleSize = 25;
+int cellSize = 20;
+int circleSize =90;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 10;
@@ -24,7 +24,7 @@ float probAliveMid = 0;
 
 
 // Variables for timer
-float interval = 500;
+  float interval = 400;
 float lastRecordedTime = 0;
 
 //variables for new cells
@@ -35,7 +35,7 @@ int newShips = 1;
 // Colors for active/inactive cells
 color alive = color(0, 200, 0);
 color dead = color(0);
-float opacity = 100;
+float opacity = 40;
 float oOffset = 0;
 //int oInterval = interval / opacity;
 int oLastTime = 0;
@@ -58,6 +58,7 @@ color[][] cellsBuffer;
 boolean pause = false;
 
 void setup() {
+  frameRate(30);
   //for automatic display position and size
   positionDisplay();
   //size (2040, 192); //1/4 of ccam display
@@ -108,6 +109,7 @@ void draw() {
   clear();
 
   oOffset = ((millis()-lastRecordedTime)/interval) * opacity;
+  //oOffset =  opacity;
 
   //if (millis()-oLastTime>oInterval) {
   //  oOffset = oOffset + 1;
@@ -118,9 +120,10 @@ void draw() {
   //}
 
   //Draw grid
+  noStroke();
   for (int x=0; x<simWidth/cellSize; x++) {
     for (int y=0; y<simHeight/cellSize; y++) {
-      noStroke();
+      
       if (cells[x+horzExtra][y+vertExtra]!=#000000 || cellsBuffer[x+horzExtra][y+vertExtra]!=#000000) {
         
 //position transformation**********************************
