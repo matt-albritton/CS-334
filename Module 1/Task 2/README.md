@@ -17,4 +17,6 @@ Spaceships are added in the "addRandom()" function, where in intervals specified
 Colors are determined by the x position of the pixel, and are pre-determined by screen.
 Lastly positionDisplay() is used at setup to find the dimenstions of the two extra monitors and set the size of the screen to cover the two monitors, and place it so it covers them all.
 
+Video:
+https://drive.google.com/file/d/1vQZKC7I46I4SckacObwdyyDbudMcoSmI/view?usp=sharing
 
