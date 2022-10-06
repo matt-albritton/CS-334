@@ -42,7 +42,8 @@ void positionDisplay() {
 //set up and call positionDisplay
 int x = 0; //cur x cordinate of gray bar
 void setup() {
-  positionDisplay();
+  //positionDisplay();
+  size (576,170);
   print("1/3: " + width/3 + ". 2/3: " + width*2/3 + ". end: " + width);
 
 }

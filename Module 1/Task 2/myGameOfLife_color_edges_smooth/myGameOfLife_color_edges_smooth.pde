@@ -12,15 +12,15 @@
 
 
 // Size of cells
-int cellSize = 2;
-int circleSize = 6;
+int cellSize = 5;
+int circleSize = 25;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 10;
 float probabilityOfAliveDuring = 30;
 
 // Variables for timer
-float interval = 800;
+float interval = 200;
 float lastRecordedTime = 0;
 
 //variables for new cells
@@ -30,7 +30,7 @@ int newLastRecordedTime = 0;
 // Colors for active/inactive cells
 color alive = color(0, 200, 0);
 color dead = color(0);
-float opacity = 75;
+float opacity = 40;
 float oOffset = 0;
 //int oInterval = interval / opacity;
 int oLastTime = 0;
@@ -51,8 +51,8 @@ color[][] cellsBuffer;
 boolean pause = false;
 
 void setup() {
-  //size (576, 170); // 1/8
-  size (1152, 340); //1/4
+  size (576, 170); // 1/8
+  //size (1152, 340); //1/4
   //size (2304, 680); // 1/2
   fullWidth = width/cellSize + (2*horzExtra);
   fullHeight = height/cellSize + (2*vertExtra);
