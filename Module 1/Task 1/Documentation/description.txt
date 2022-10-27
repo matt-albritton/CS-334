@@ -1,0 +1,20 @@
+The method in which we mapped the projectors centered around pixel addresses. Our two photos - computer_layout and 
+display_layout show the 6 screens as mapped to the projectors and to the computer. In words, the computer screen is a wide
+rectangle as expected - the picture in computer_layout is exagerrated to better show how it maps to the 6 display screens. 
+The display screens are six tall rectangles in a row, emulating a large broken up computer screen. However, the mapping 
+from computer to screens is not super intuitive. If one were to move the mouse across the computer screen left to right
+the mouse on the display would start on the top of screen 1 moving down until it reached the bottom then reappear at the 
+top of screen 2 moving down and then reappearing at the top of screen 3, etc. The right side of each display screen is a 
+portion of the top of the computer display. If one were to move the mouse from top to bottom on the computer, the mouse 
+on the display screen would move from right to left. Along with the flipped orientation, the display screens are not 
+oriented 1-6 left to right, display_layout shows the odering of the display screens in comparison to a computer
+screen split up into six even parts.
+
+In order to achive projector displays with
+arrow orientation and screen number as described in display_layout, you can create the display as shown in computer_layout. 
+We kept the (x,y) coordinate system of the computer window required, and you can see the pixel coordinates of the corners 
+that match up on both images. Lastly, we added simple markings on the edges of the displays that show which display connects 
+to which- these correlate between the two images.
+
+This system works by showing the desired orientation and display of the projectors in display_layout, and then showing what 
+mapping, orientation, and ordering is needed to achive this in computer_layout.
