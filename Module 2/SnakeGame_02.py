@@ -6,6 +6,7 @@ import time
 import random
 import serial
 
+
 #variables for incoming input
 button = 1
 push = 0
@@ -18,7 +19,7 @@ head = [32,32]
 body = [[32,32], [32-1,32], [32-2,32], [32-3,32], [32-4,32]]
 direction = 'RIGHT'
 change = direction
-length = 4
+length = 0
 colors = False
 continuum = 0
 #fruit location
@@ -35,10 +36,13 @@ canvas = matrix
 #colors and fonts
 green = graphics.Color(0, 255, 0)
 red = graphics.Color(255, 0, 0)
+blue = graphics.Color(0,0,255)
 font = graphics.Font()
 font.LoadFont("../raspberrypi/rpi-rgb-led-matrix/fonts/7x13.bdf")
 smallFont = graphics.Font()
 smallFont.LoadFont("../raspberrypi/rpi-rgb-led-matrix/fonts/6x10.bdf")
+smallestFont = graphics.Font()
+smallestFont.LoadFont("../raspberrypi/rpi-rgb-led-matrix/fonts/5x8.bdf")
 
 #main function
 def main():
@@ -145,13 +149,13 @@ def main():
 
             #around edges
             if head[0] > 64 :
-                head[0] -= 64
+                head[0] -= 65
             if head[0] < 0:
-                head[0] += 64
+                head[0] += 65
             if head[1] > 64 :
-                head[1] -= 64
+                head[1] -= 65
             if head[1] < 0:
-                head[1] += 64
+                head[1] += 65
             #draw body
             for pos in body:
                 graphics.DrawCircle(canvas, pos[0], pos[1],1, my_color)
@@ -177,9 +181,17 @@ def main():
 def gameOver():
     global head, body, direction, change, length, fruit, button, ser
     canvas.Clear()
-    graphics.DrawText(canvas, font, 18, 20, red, "Game")
-    graphics.DrawText(canvas, font, 18, 35, red, "Over")
-    graphics.DrawText(canvas, font, 25, 50, green, str(length))
+    with open("highScore.txt", 'r+', encoding = 'utf-8') as f:
+        highScore = int(f.read())
+        if length > highScore:
+            highScore = length
+            f.seek(0)
+            f.write(str(highScore))
+            f.truncate()
+        graphics.DrawText(canvas, font, 19, 15, red, "Game")
+        graphics.DrawText(canvas, font, 19, 27, red, "Over")
+        graphics.DrawText(canvas, font, 25, 40, green, str(length))
+        graphics.DrawText(canvas, smallFont, 12, 60, blue, "Best:"+str(highScore))
     button = 1
     time.sleep(1)
     ser.reset_input_buffer()
@@ -194,7 +206,7 @@ def gameOver():
     body = [[x,y], [x-1,y], [x-2,y], [x-3,y], [x-4,y]]
     direction = 'RIGHT' 
     change = direction
-    length=4
+    length=0
     fruit = [random.randrange(4,60), random.randrange(4,60)]
     button = 1    
     time.sleep(0.2)
