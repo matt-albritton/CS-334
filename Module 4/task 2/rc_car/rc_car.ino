@@ -1,29 +1,12 @@
-/*
-    Video: https://www.youtube.com/watch?v=oCMOYS71NIU
-    Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleNotify.cpp
-    Ported to Arduino ESP32 by Evandro Copercini
 
-   Create a BLE server that, once we receive a connection, will send periodic notifications.
-   The service advertises itself as: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-   Has a characteristic of: 6E400002-B5A3-F393-E0A9-E50E24DCCA9E - used for receiving data with "WRITE" 
-   Has a characteristic of: 6E400003-B5A3-F393-E0A9-E50E24DCCA9E - used to send data with  "NOTIFY"
-
-   The design of creating the BLE server is:
-   1. Create a BLE Server
-   2. Create a BLE Service
-   3. Create a BLE Characteristic on the Service
-   4. Create a BLE Descriptor on the characteristic
-   5. Start the service.
-   6. Start advertising.
-
-   In this example rxValue is the data received (only accessible inside that function).
-   And txValue is the data to be sent, in this example just a byte incremented every second. 
-*/
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include <Stepper.h>
+#include <ESP32Servo.h>
 
+// ------------       BLE stuff -----------
 BLEServer *pServer = NULL;
 BLECharacteristic * pTxCharacteristic;
 bool deviceConnected = false;
@@ -32,11 +15,23 @@ uint8_t txValue = 0;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
-
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
+// --------------- Motor & Servo Stuff ----------------
+int speed = 15; //    SPEED IN RPM OF MOTOR
+Servo myservo;  // create servo object to control a servo
+int pos = 0;    // variable to store the servo position
+int servoPin = 12;
+const int stepsPerRevolution = 2048;  // change this to fit the number of steps per revolution
+// ULN2003 Motor Driver Pins
+#define IN1 17 //19
+#define IN2 5 //18
+#define IN3 18 //5
+#define IN4 19 //17
+// initialize the stepper library
+Stepper myStepper(stepsPerRevolution, IN1, IN3, IN2, IN4);
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
@@ -48,11 +43,10 @@ class MyServerCallbacks: public BLEServerCallbacks {
     }
 };
 
+//class for doing things with received values!
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      std::string rxValue = pCharacteristic->getValue();
-
-      if (rxValue.length() > 0) {
+      std::string rxValue = pCharacteristic->getValue();\555555555555555555555      if (rxValue.length() > 0) {
         Serial.println("*********");
         Serial.print("Received Value: ");
         for (int i = 0; i < rxValue.length(); i++)
@@ -67,9 +61,42 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
 void setup() {
   Serial.begin(115200);
+  setupBLE();
+  myStepper.setSpeed(speed);
+  setupServo();
 
+}
+
+void loop() {
+  //1 is 1/speed a second. so 1 loop per 1/15th a second = delay of 0.066 seconds
+  //5 is 5/speed a second. so 1 loop per 1/3 a second = delay of 0.333 seconds
+  myStepper.step(5);
+
+  pos = ((pos + 1) % 90);
+  Serial.println(pos + 45);
+  myservo.write(int(pos));
+  if (pos == 0){
+    delay (500);
+  }
+
+  // disconnecting
+  if (!deviceConnected && oldDeviceConnected) {
+      delay(500); // give the bluetooth stack the chance to get things ready
+      pServer->startAdvertising(); // restart advertising
+      Serial.println("start advertising");
+      oldDeviceConnected = deviceConnected;
+  }
+  // connecting
+  if (deviceConnected && !oldDeviceConnected) {
+      oldDeviceConnected = deviceConnected;
+  }
+}
+
+//all this was in setup - moving to own function
+void setupBLE(){
+  
   // Create the BLE Device
-  BLEDevice::init("UART Service");
+  BLEDevice::init("Car Thingy");
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
@@ -101,26 +128,22 @@ void setup() {
   Serial.println("Waiting a client connection to notify...");
 }
 
-void loop() {
-
-    if (deviceConnected) {
-        // Serial.printf("*** Sent Value: %d ***\n", txValue);
-        // pTxCharacteristic->setValue(&txValue, 1);
-        // pTxCharacteristic->notify();
-        // txValue++;
-		delay(10); // bluetooth stack will go into congestion, if too many packets are sent
-	}
-
-    // disconnecting
-    if (!deviceConnected && oldDeviceConnected) {
-        delay(500); // give the bluetooth stack the chance to get things ready
-        pServer->startAdvertising(); // restart advertising
-        Serial.println("start advertising");
-        oldDeviceConnected = deviceConnected;
-    }
-    // connecting
-    if (deviceConnected && !oldDeviceConnected) {
-		// do stuff here on connecting
-        oldDeviceConnected = deviceConnected;
-    }
+void setupServo(){
+  //servo:
+  // Allow allocation of all timers
+	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+	myservo.setPeriodHertz(50);    // standard 50 hz servo
+	myservo.attach(servoPin, 0, 3500); // attaches the servo on pin 18 to the servo object
 }
+
+//       ------ Sending packet stuff, I don't need but useful maybe later
+// if (deviceConnected) {
+//     Serial.printf("*** Sent Value: %d ***\n", txValue);
+//     need to check if this is necessary to receive vales
+//     pTxCharacteristic->setValue(&txValue, 1);
+//     pTxCharacteristic->notify();
+//     txValue++;
+// delay(10); // bluetooth stack will go into congestion, if too many packets are sent
