@@ -1,4 +1,6 @@
+// Module 4 car control
 
+//neccessary libraries
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -39,6 +41,7 @@ const int stepsPerRevolution = 2048;  // change this to fit the number of steps 
 // Stepper myStepper(stepsPerRevolution, IN1, IN3, IN2, IN4);
 AccelStepper myStepper(HALFSTEP, IN1, IN3, IN2, IN4);
 
+//call back just for connected v not connected
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       deviceConnected = true;
@@ -59,25 +62,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       if ((char)buffer[0] == '!') {  //Sensor data flag
         //   Serial.println("Accelerometer Data:");
           x = *( (float*)(buffer + 2) );
-        //   Serial.print("x = ");
-        //   Serial.println(x, 7);
           y = *( (float*)(buffer + 6) );
-        //   Serial.print("y = ");
-        //   Serial.println(y, 7);
-        //   float z = *( (float*)(buffer + 10) );
-        //   Serial.print("z = ");
-        //   Serial.println(z, 7); 
-        // Serial.println("");
       }
     }
 
 };
 
-
+//set stuff up!
 void setup() {
   Serial.begin(115200);
   setupBLE();
-  myStepper.setMaxSpeed(1000);
+  myStepper.setMaxSpeed(1500);
   myStepper.move(1);
   myStepper.setSpeed(1000);
   setupServo();
@@ -89,11 +84,8 @@ void loop() {
   //5 is 5/speed a second. so 1 loop per 1/3 a second = delay of 0.333 seconds
   // myStepper.step(5);
 
+//---------- Control magic-----------
   //servo range 45. from 68 to 113
-  // Serial.print("x = ");
-  // Serial.println(x, 7);
-  // Serial.print("y = ");
-  // Serial.println(y, 7);
 
   //use y. y:0.5 = pos:68, y:-0.5 = pos:113
   // float offsetY = y + 1;
@@ -113,16 +105,16 @@ void loop() {
 
 
   // use x for movement. forward = x:0.5 = speed 15. y -0.5 = -15 (but cap at like 5 lol)
-  double slopeX = 1.0 * (1000 + 1000) / (0.5 + 0.5);
-  speed = -1000 + slopeX *(x +0.5);
+  double slopeX = 1.0 * (1500 + 1500) / (0.5 + 0.5);
+  speed = -1500 + slopeX *(x +0.5);
   if (speed < 250 && speed > -250){
     speed = 0;
   }
-  if (speed < -400){
-    speed = -400;
+  if (speed < -1000){
+    speed = -1000;
   }
-  if (speed > 1000){
-    speed = 1000;
+  if (speed > 1500){
+    speed = 1500;
   }
   // Serial.print("speed: ");
   // Serial.println(speed);
@@ -196,47 +188,6 @@ void setupServo(){
 }
 
 
-void printSensorDataXYZ(uint8_t *buffer) {
-
-  float x = *( (float*)(buffer + 2) );
-  Serial.print("x = ");
-  Serial.println(x, 7);
-
-  float y = *( (float*)(buffer + 6) );
-  Serial.print("y = ");
-  Serial.println(y, 7);
-
-  float z = *( (float*)(buffer + 10) );
-  Serial.print("z = ");
-  Serial.println(z, 7); 
-
-}
-
-boolean checkCRC(uint8_t *buffer) {
-
-  uint8_t len = sizeof(buffer);
-  uint8_t crc = buffer[len-2];
-  uint8_t sum = 0;
-
-  for (int i = 0; i < (len-1); i++) {
-
-    sum += buffer[i];
-
-  }
-
-  Serial.print("CRC ");
-
-  if ((crc & ~sum) == 0) {
-    Serial.println("PASS");
-    return true;
-  }
-
-  else {
-    Serial.println("FAIL");
-    return false;
-  }
-
-}
 //       ------ Sending packet stuff, I don't need but useful maybe later
 // if (deviceConnected) {
 //     Serial.printf("*** Sent Value: %d ***\n", txValue);
