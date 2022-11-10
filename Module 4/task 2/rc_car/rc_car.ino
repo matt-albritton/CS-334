@@ -46,16 +46,25 @@ class MyServerCallbacks: public BLEServerCallbacks {
 //class for doing things with received values!
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      std::string rxValue = pCharacteristic->getValue();\555555555555555555555      if (rxValue.length() > 0) {
-        Serial.println("*********");
-        Serial.print("Received Value: ");
-        for (int i = 0; i < rxValue.length(); i++)
-          Serial.print(rxValue[i]);
-
-        Serial.println();
-        Serial.println("*********");
+      // std::string buffer = pCharacteristic->getValue();
+      // this was a pain. had to switch from getValue to getData
+      //issue with getData giving pre-formatted into characterstic values, didn't work for floats
+      uint8_t* buffer = pCharacteristic->getData();
+      if ((char)buffer[0] == '!') {  //Sensor data flag
+          Serial.println("Magnetometer Data:");
+          float x = *( (float*)(buffer + 2) );
+          Serial.print("x = ");
+          Serial.println(x, 7);
+          float y = *( (float*)(buffer + 6) );
+          Serial.print("y = ");
+          Serial.println(y, 7);
+          float z = *( (float*)(buffer + 10) );
+          Serial.print("z = ");
+          Serial.println(z, 7); 
+        Serial.println("");
       }
     }
+
 };
 
 
@@ -70,14 +79,17 @@ void setup() {
 void loop() {
   //1 is 1/speed a second. so 1 loop per 1/15th a second = delay of 0.066 seconds
   //5 is 5/speed a second. so 1 loop per 1/3 a second = delay of 0.333 seconds
-  myStepper.step(5);
+  // myStepper.step(5);
 
-  pos = ((pos + 1) % 90);
-  Serial.println(pos + 45);
-  myservo.write(int(pos));
+  //servo range 45. from 68 to 113
+  // pos = ((pos + 1) % 45);
+  // Serial.println(pos + 68);
+  // myservo.write(int(pos + 68));
+  // myservo.write(int(90));
   if (pos == 0){
-    delay (500);
+    delay (1000);
   }
+  delay(3000);
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
@@ -139,6 +151,48 @@ void setupServo(){
 	myservo.attach(servoPin, 0, 3500); // attaches the servo on pin 18 to the servo object
 }
 
+
+void printSensorDataXYZ(uint8_t *buffer) {
+
+  float x = *( (float*)(buffer + 2) );
+  Serial.print("x = ");
+  Serial.println(x, 7);
+
+  float y = *( (float*)(buffer + 6) );
+  Serial.print("y = ");
+  Serial.println(y, 7);
+
+  float z = *( (float*)(buffer + 10) );
+  Serial.print("z = ");
+  Serial.println(z, 7); 
+
+}
+
+boolean checkCRC(uint8_t *buffer) {
+
+  uint8_t len = sizeof(buffer);
+  uint8_t crc = buffer[len-2];
+  uint8_t sum = 0;
+
+  for (int i = 0; i < (len-1); i++) {
+
+    sum += buffer[i];
+
+  }
+
+  Serial.print("CRC ");
+
+  if ((crc & ~sum) == 0) {
+    Serial.println("PASS");
+    return true;
+  }
+
+  else {
+    Serial.println("FAIL");
+    return false;
+  }
+
+}
 //       ------ Sending packet stuff, I don't need but useful maybe later
 // if (deviceConnected) {
 //     Serial.printf("*** Sent Value: %d ***\n", txValue);
