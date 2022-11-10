@@ -3,8 +3,10 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include <Stepper.h>
+// #include <Stepper.h>
 #include <ESP32Servo.h>
+#include <AccelStepper.h>
+#define HALFSTEP 8
 
 // ------------       BLE stuff -----------
 BLEServer *pServer = NULL;
@@ -20,10 +22,13 @@ uint8_t txValue = 0;
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
 // --------------- Motor & Servo Stuff ----------------
-int speed = 15; //    SPEED IN RPM OF MOTOR
+int speed = 0; //    SPEED of motor
 Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable to store the servo position
 int servoPin = 12;
+float x = 0;  //x is front back pitch corresponding to speed
+float y = 0;  //y is left and right pitch corresponding to steer
+
 const int stepsPerRevolution = 2048;  // change this to fit the number of steps per revolution
 // ULN2003 Motor Driver Pins
 #define IN1 17 //19
@@ -31,7 +36,8 @@ const int stepsPerRevolution = 2048;  // change this to fit the number of steps 
 #define IN3 18 //5
 #define IN4 19 //17
 // initialize the stepper library
-Stepper myStepper(stepsPerRevolution, IN1, IN3, IN2, IN4);
+// Stepper myStepper(stepsPerRevolution, IN1, IN3, IN2, IN4);
+AccelStepper myStepper(HALFSTEP, IN1, IN3, IN2, IN4);
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
@@ -51,17 +57,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       //issue with getData giving pre-formatted into characterstic values, didn't work for floats
       uint8_t* buffer = pCharacteristic->getData();
       if ((char)buffer[0] == '!') {  //Sensor data flag
-          Serial.println("Magnetometer Data:");
-          float x = *( (float*)(buffer + 2) );
-          Serial.print("x = ");
-          Serial.println(x, 7);
-          float y = *( (float*)(buffer + 6) );
-          Serial.print("y = ");
-          Serial.println(y, 7);
-          float z = *( (float*)(buffer + 10) );
-          Serial.print("z = ");
-          Serial.println(z, 7); 
-        Serial.println("");
+        //   Serial.println("Accelerometer Data:");
+          x = *( (float*)(buffer + 2) );
+        //   Serial.print("x = ");
+        //   Serial.println(x, 7);
+          y = *( (float*)(buffer + 6) );
+        //   Serial.print("y = ");
+        //   Serial.println(y, 7);
+        //   float z = *( (float*)(buffer + 10) );
+        //   Serial.print("z = ");
+        //   Serial.println(z, 7); 
+        // Serial.println("");
       }
     }
 
@@ -71,7 +77,9 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 void setup() {
   Serial.begin(115200);
   setupBLE();
-  myStepper.setSpeed(speed);
+  myStepper.setMaxSpeed(1000);
+  myStepper.move(1);
+  myStepper.setSpeed(1000);
   setupServo();
 
 }
@@ -82,14 +90,50 @@ void loop() {
   // myStepper.step(5);
 
   //servo range 45. from 68 to 113
-  // pos = ((pos + 1) % 45);
-  // Serial.println(pos + 68);
-  // myservo.write(int(pos + 68));
-  // myservo.write(int(90));
-  if (pos == 0){
-    delay (1000);
+  // Serial.print("x = ");
+  // Serial.println(x, 7);
+  // Serial.print("y = ");
+  // Serial.println(y, 7);
+
+  //use y. y:0.5 = pos:68, y:-0.5 = pos:113
+  // float offsetY = y + 1;
+  // double slope = 1.0 * (113 - 68) / (0.5 - 1.5);
+  // pos = 68 + slope * (offsetY - 1.5);
+  double slopeY = 1.0 * (113 - 68) / (-0.5 - 0.5);
+  pos = 68 + slopeY * (y - 0.5);
+  if (pos < 68){
+    pos = 68;
   }
-  delay(3000);
+  if (pos > 113){
+    pos = 113;
+  }
+  // Serial.print("pos: ");
+  // Serial.println(pos);
+  myservo.write(int(pos));
+
+
+  // use x for movement. forward = x:0.5 = speed 15. y -0.5 = -15 (but cap at like 5 lol)
+  double slopeX = 1.0 * (1000 + 1000) / (0.5 + 0.5);
+  speed = -1000 + slopeX *(x +0.5);
+  if (speed < 250 && speed > -250){
+    speed = 0;
+  }
+  if (speed < -400){
+    speed = -400;
+  }
+  if (speed > 1000){
+    speed = 1000;
+  }
+  // Serial.print("speed: ");
+  // Serial.println(speed);
+  myStepper.setSpeed(speed);
+  myStepper.runSpeed();
+  // myStepper.step(1);
+  // myStepper.run();
+
+  
+
+  // delay(100);
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
