@@ -139,10 +139,10 @@ def checkAway(name):
         away[index] == True
         parseInput(name, "Traveling")
         return
-    if datetime.now() - timedelta(seconds=45) > times_away[index]:
+    if datetime.now() - timedelta(hours=14) > times_away[index]:
         parseInput(name, "Mortal Peril")
         return
-    if datetime.now() - timedelta(seconds=4) > times_away[index]:
+    if datetime.now() - timedelta(hours=4) > times_away[index]:
         parseInput(name, "Lost")
         return
     print("<4s")
