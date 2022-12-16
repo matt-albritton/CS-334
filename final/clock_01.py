@@ -110,7 +110,7 @@ def on_message(client, userdata, msg):
     # print("len data: " + str(len(data)))
     # print("len regs: " + str(len(regs)))
     if not "inregions" in data:
-        print(f"{msg.topic} Traveling")
+        # print(f"{msg.topic} Traveling")
         checkAway(msg.topic)
         # parseInput(msg.topic, "Traveling")
         return;
@@ -119,7 +119,7 @@ def on_message(client, userdata, msg):
         location = regs[1]
     else:
         location = regs[0]
-    print(f"{msg.topic} to {location}")
+    # print(f"{msg.topic} to {location}")
     parseInput(msg.topic, location)
 
 
@@ -133,18 +133,19 @@ def checkAway(name):
     else:
         print("bad name.")
         return
-    
     if away[index] == False:
+        print("first time traveler")
         times_away[index] = datetime.now()
         away[index] == True
         parseInput(name, "Traveling")
         return
-    if datetime.now() - timedelta(hours=14) > times_away[index]:
+    if datetime.now() - timedelta(seconds=45) > times_away[index]:
         parseInput(name, "Mortal Peril")
         return
-    if datetime.now() - timedelta(hours=4) > times_away[index]:
+    if datetime.now() - timedelta(seconds=4) > times_away[index]:
         parseInput(name, "Lost")
         return
+    print("<4s")
     parseInput(name, "Traveling")
     return
 
@@ -184,6 +185,7 @@ def goTo(motor, position):
     travel(motor, int(to_get_there))
 
 def parseInput(name, place):
+    print(f"{name} to {place}")
     pos = 0
     if name == "matt":
         motor = 0
@@ -193,6 +195,7 @@ def parseInput(name, place):
         motor=2
     else:
         print("not valid name")
+    away[motor] = False
     if place == "Home":
         pos = 0
     elif place ==  "South Pole":
@@ -204,6 +207,7 @@ def parseInput(name, place):
     elif place ==  "Work":
         pos = 4
     elif place ==  "Mortal Peril":
+        away[motor] = True
         pos = 5
     elif place ==  "School":
         pos = 6
@@ -212,14 +216,15 @@ def parseInput(name, place):
     elif place ==  "Out West":
         pos = 8
     elif place ==  "Lost":
+        away[motor] = True
         pos = 9
     elif place ==  "Apartment":
         pos = 10
     elif place ==  "Traveling":
+        away[motor] = True
         pos = 11
     elif place ==  "At Sea":
         pos = 12
-        
     else:
         print("location wasn't matched w/ clock. sending home")
     goTo(motor, pos)
